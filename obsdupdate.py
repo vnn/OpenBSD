@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.4
+#!/usr/bin/env python
 
 """
 Manage OpenBSD-stable userland, ports and kernel updates.
