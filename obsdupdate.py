@@ -67,6 +67,7 @@ if __name__ == "__main__":
     # Check permissions.
     if os.getenv('USER') != 'root':
         print('Error: this command should be run as root')
+        exit()
 
     # Configuration variables.
     default_cvs_root = 'anoncvs@anoncvs.fr.openbsd.org:/cvs'
