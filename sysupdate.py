@@ -78,7 +78,7 @@ if __name__ == "__main__":
     default_cvs_root = 'anoncvs@anoncvs.fr.openbsd.org:/cvs'
     cvsroot = args.cvs if args.cvs else default_cvs_root
     release = 'OPENBSD_' + os.uname()[2].replace('.', '_')
-    repo = [vars(args)[i] for i in ['fetch', 'update', 'build'] if vars(args)[i]][0]
+    repo = [vars(args)[i] for i in vars(args) if vars(args)[i] and i != 'cvs'][0]
     arch = os.uname()[4]
 
     # Process arguments.
@@ -88,5 +88,4 @@ if __name__ == "__main__":
         update()
     elif args.build:
         build()
-
     print('done')
