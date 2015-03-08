@@ -6,9 +6,10 @@ Manage OpenBSD-stable userland, ports and kernel updates.
 
 __version__ = '0.1'
 
-import os
-import subprocess
 import argparse
+import os
+import re
+import subprocess
 
 
 def cmd(cmd):
@@ -77,6 +78,14 @@ if __name__ == "__main__":
     # Define configuration variables.
     default_cvs_root = 'anoncvs@anoncvs.fr.openbsd.org:/cvs'
     cvs_root = args.cvs[0] if args.cvs else default_cvs_root
+    valid_cvs_url = re.compile(
+        '^[A-Z0-9._%-+]+@'
+        '(([A-Z0-9]([A-Z0-9-]{0,61}[A-Z0-9])?)+(\.[A-Z]{2,6}\.?)?|'
+        '\d{1,3}\.\d{1,3}\.\d{1,3})'
+        '(:/[^?#]*)?$', re.IGNORECASE)
+    if not re.match(valid_cvs_url, cvs_root):
+        print('Error: invalid CVS server')
+        exit()
     release = 'OPENBSD_' + os.uname()[2].replace('.', '_')
     repo = [vars(args)[i] for i in vars(args) if vars(args)[i] and i != 'cvs'][0]
     arch = os.uname()[4]
