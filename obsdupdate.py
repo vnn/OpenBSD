@@ -1,7 +1,7 @@
 #!/usr/bin/env python3.4
 
 """
-Manage OpenBSD userland, ports and kernel updates.
+Manage OpenBSD-stable userland, ports and kernel updates.
 """
 
 
@@ -50,7 +50,7 @@ def build():
 
 if __name__ == "__main__":
     # Arguments parsing.
-    parser = argparse.ArgumentParser(description=('Manage OpenBSD userland, '
+    parser = argparse.ArgumentParser(description=('Manage OpenBSD-stable userland, '
                                                   'ports and kernel updates.'),
                                      prog='obsdupdate')
     group = parser.add_mutually_exclusive_group(required=True)
