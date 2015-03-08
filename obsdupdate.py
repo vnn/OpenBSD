@@ -35,15 +35,15 @@ def build():
     """ Build and install corresponding part of the system. """
 
     print('Rebuilding '+repo+'...')
-    if args['kernel']:
+    if args.build == 'kernel':
         cmd('cd /usr/src/sys/arch/'+arch+'/conf && config GENERIC.MP')
         cmd('cd /usr/src/sys/arch/'+arch+'/compile/GENERIC.MP '
             '&& make clean && make && make install')
-    elif args['userland']:
+    elif args.build == 'userland':
         cmd('rm -rf /usr/obj/* && cd /usr/src && make obj')
         cmd('cd /usr/src/etc && env DESTDIR=/ make distrib-dirs')
         cmd('cd /usr/src && make build')
-    elif args['xenocara']:
+    elif args.build == 'xenocara':
         cmd('rm -rf /usr/xobj/*')
         cmd('cd /usr/xenocara && make bootstrap && make obj && make build')
 
@@ -63,6 +63,10 @@ if __name__ == "__main__":
     parser.add_argument('-c', '--cvs', nargs=1, metavar='CVSROOT',
                         help='Define CVS root server.')
     args = parser.parse_args()
+
+    # Check permissions.
+    if os.getenv('USER') != 'root':
+        print('Error: this command should be run as root')
 
     # Configuration variables.
     default_cvs_root = 'anoncvs@anoncvs.fr.openbsd.org:/cvs'
