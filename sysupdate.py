@@ -70,18 +70,17 @@ if __name__ == "__main__":
                         help='Define CVS root server.')
     args = parser.parse_args()
 
-    # Check permissions.
-    if os.getenv('USER') != 'root':
-        print('Error: this command should be run as root')
-        exit()
-
     # Define configuration variables.
+    default_cvs_root = 'anoncvs@anoncvs.fr.openbsd.org:/cvs'
+    cvs_root = args.cvs[0] if args.cvs else default_cvs_root
     release = 'OPENBSD_' + os.uname()[2].replace('.', '_')
     repo = [vars(args)[i] for i in vars(args) if vars(args)[i] and i != 'cvs'][0]
     arch = os.uname()[4]
 
-    default_cvs_root = 'anoncvs@anoncvs.fr.openbsd.org:/cvs'
-    cvs_root = args.cvs[0] if args.cvs else default_cvs_root
+    # Check user permissions and cvs server url before processing.
+    if os.getenv('USER') != 'root':
+        print('Error: this command should be run as root')
+        exit()
     valid_cvs_url = re.compile(
         '^[A-Z0-9._%-+]+@'
         '(([A-Z0-9]([A-Z0-9-]{0,61}[A-Z0-9])?)+(\.[A-Z]{2,6}\.?)?|'
