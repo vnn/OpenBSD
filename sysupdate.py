@@ -76,7 +76,7 @@ if __name__ == "__main__":
 
     # Define configuration variables.
     default_cvs_root = 'anoncvs@anoncvs.fr.openbsd.org:/cvs'
-    cvs_root = args.cvs if args.cvs else default_cvs_root
+    cvs_root = args.cvs[0] if args.cvs else default_cvs_root
     release = 'OPENBSD_' + os.uname()[2].replace('.', '_')
     repo = [vars(args)[i] for i in vars(args) if vars(args)[i] and i != 'cvs'][0]
     arch = os.uname()[4]
