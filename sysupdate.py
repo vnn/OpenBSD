@@ -76,6 +76,10 @@ if __name__ == "__main__":
         exit()
 
     # Define configuration variables.
+    release = 'OPENBSD_' + os.uname()[2].replace('.', '_')
+    repo = [vars(args)[i] for i in vars(args) if vars(args)[i] and i != 'cvs'][0]
+    arch = os.uname()[4]
+
     default_cvs_root = 'anoncvs@anoncvs.fr.openbsd.org:/cvs'
     cvs_root = args.cvs[0] if args.cvs else default_cvs_root
     valid_cvs_url = re.compile(
@@ -86,9 +90,6 @@ if __name__ == "__main__":
     if not re.match(valid_cvs_url, cvs_root):
         print('Error: invalid CVS server')
         exit()
-    release = 'OPENBSD_' + os.uname()[2].replace('.', '_')
-    repo = [vars(args)[i] for i in vars(args) if vars(args)[i] and i != 'cvs'][0]
-    arch = os.uname()[4]
 
     # Process arguments.
     if args.fetch:
