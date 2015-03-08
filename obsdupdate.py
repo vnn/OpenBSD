@@ -2,28 +2,13 @@
 
 """
 Manage OpenBSD userland, ports and kernel updates.
-
-Usage:
-  obsdupdate --fetch  (ports | src | xenocara) [(--cvs <cvsroot>)]
-  obsdupdate --update (ports | src | xenocara) [(--cvs <cvsroot>)]
-  obsdupdate --build  (kernel | userland | xenocara) [(--cvs <cvsroot>)]
-  obsdupdate --help
-  obsdupdate --version
-
-Options:
-  -h --help        Show this screen.
-  -v --version     Show version.
-  -f --fetch       Fetch sources from CVS.
-  -u --update      Update source tree from CVS.
-  -b --build       Rebuild and install a part of the system.
-  -c --cvs         Define anonymous CVS root server.
 """
 
 
 import os
 import sys
 import subprocess
-import docopt
+import argparse
 
 
 def cmd(cmd):
@@ -65,21 +50,32 @@ def build():
 
 
 if __name__ == "__main__":
-    args = docopt.docopt(__doc__, version='obsdupdate 0.2.0')
+    parser = argparse.ArgumentParser(description=('Manage OpenBSD userland, '
+                                                 'ports and kernel updates.'),
+                                     prog='obsdupdate')
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('-f', '--fetch', choices=['ports', 'src', 'xenocara'],
+                        help='Fetch sources from CVS.')
+    group.add_argument('-u', '--update', choices=['ports', 'src', 'xenocara'],
+                        help='Update source tree from CVS.')
+    group.add_argument('-b', '--build', choices=['kernel', 'userland', 'xenocara'],
+                        help='Rebuild and install a part of the system.')
+    parser.add_argument('-c', '--cvs', nargs=1, help='Define CVS root server.')
+    args = parser.parse_args()
 
     # Configuration variables goes here.
     default_cvs_root = 'anoncvs@anoncvs.fr.openbsd.org:/cvs'
-    cvsroot = args['--cvs'] if args['--cvs'] else default_cvs_root
+    cvsroot = args.cvs if args.cvs else default_cvs_root
     release = 'OPENBSD_' + os.uname()[2].replace('.', '_')
     repo = sys.argv[2]
     arch = os.uname()[4]
 
     # Process arguments
-    if args['--fetch']:
+    if args.fetch:
         fetch()
-    elif args['--update']:
+    elif args.update:
         update()
-    elif args['--build']:
+    elif args.build:
         build()
 
     print('done')
