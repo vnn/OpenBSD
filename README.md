@@ -1,0 +1,2 @@
+# OpenBSD
+Various scripts
