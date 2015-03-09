@@ -24,7 +24,7 @@ class BlowfishCore:
         """ Encrypt file and add necessary padding bytes. """
 
         padding = 8 - (len(infile) % 8)
-        for i in range(padding-1):
+        for i in range(padding - 1):
             infile += os.urandom(1)
         # The latest byte is used as an indicator.
         infile += bytes(str(padding), 'utf-8')
