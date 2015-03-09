@@ -1,13 +1,14 @@
 #!/usr/bin/env python3.4
 
 """
-Encrypt and decrypt a file using Blowfish.
+Encrypt and decrypt a file using Blowfish cipher.
 """
 
 import argparse
 import os
-from Crypto.Cipher import Blowfish
 from getpass import getpass
+
+from Crypto.Cipher import Blowfish
 
 
 class BlowfishCore:
@@ -36,6 +37,7 @@ class BlowfishCore:
         """ Decrypt a file using Blowfish. """
 
         original_file = self.__cipher.decrypt(infile)
+        # Remove the padding added during encryption.
         padding = int(str(original_file)[-2])
         return original_file[:-padding]
 
@@ -70,18 +72,18 @@ if __name__ == "__main__":
                         metavar='<outfile>', help='Write data to <outfile>.')
     args = parser.parse_args()
 
-    # Get password from user input, open the file
-    # to be processed and initialize Blowfish cypher.
+    # Get password from user input, open infile
+    # and initialize Blowfish.
     password = get_password()
     with open(args.infile.name, 'rb') as f:
         in_data = f.read()
-    bfcore = BlowfishCore(password)
+    bfcrypt = BlowfishCore(password)
 
     # Process cryptographic operations.
     if args.encrypt:
-        out_data = bfcore.encrypt(in_data)
+        out_data = bfcrypt.encrypt(in_data)
     elif args.decrypt:
-        out_data = bfcore.decrypt(in_data)
+        out_data = bfcrypt.decrypt(in_data)
 
     # Write processed data to file or stdin.
     if args.outfile:
