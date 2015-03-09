@@ -67,24 +67,20 @@ if __name__ == "__main__":
                        help='Encrypt file.')
     group.add_argument('-d', '--decrypt', const=True, action='store_const',
                        help='Decrypt file.')
-    parser.add_argument('infile', type=argparse.FileType('r'),
+    parser.add_argument('infile', type=argparse.FileType('rb'),
                         metavar='<infile>', help='Read data from <infile>.')
-    parser.add_argument('outfile', type=argparse.FileType('w'), nargs='?',
+    parser.add_argument('outfile', type=argparse.FileType('wb'), nargs='?',
                          metavar='<outfile>', default=sys.stdout,
                          help='Write data to <outfile>.')
     args = parser.parse_args()
 
     # Init cipher with password read from user input, then read infile.
     bfcrypt = BlowfishCore(get_password())
-    with open(args.infile.name, 'rb') as f:
-        infile = f.read()
+    infile = args.infile.read()
 
     # Process cryptographic operations and store results.
     data = bfcrypt.encrypt(infile) if args.encrypt else bfcrypt.decrypt(infile)
 
     # Write processed data to stdout or outfile.
-    if args.outfile.name == '<stdout>':
-        sys.stdout.write(str(data)+'\n')
-    else:
-        with open(args.outfile.name, 'wb') as f:
-            f.write(data)
+    data = str(data)+'\n' if args.outfile.name == '<stdout>' else data
+    args.outfile.write(data)
