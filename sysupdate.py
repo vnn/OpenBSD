@@ -17,25 +17,19 @@ def cmd(cmd):
 
 
 def fetch():
-
     """ Fetch corresponding sources from CVS. """
-
     print('Fetching OpenBSD '+repo+' tree from CVS...')
     cmd('cd /usr && cvs -qd '+cvs_root+' get -r'+release+' -P '+repo)
 
 
 def update():
-
     """ Update corresponding sources from CVS. """
-
     print('Updating OpenBSD '+repo+' tree from CVS...')
     cmd('cd /usr/'+repo+' && cvs -d '+cvs_root+' -q up -r'+release + ' -Pd')
 
 
 def build():
-
     """ Build and install corresponding part of the system. """
-
     print('Rebuilding '+repo+'...')
     if args.build == 'kernel':
         cmd('cd /usr/src/sys/arch/'+arch+'/conf && config GENERIC.MP')
