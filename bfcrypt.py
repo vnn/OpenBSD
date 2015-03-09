@@ -33,9 +33,7 @@ class BlowfishCipher:
 
     def __del_pad(self, chunk):
         """ Remove padding bytes. """
-        padding = int(chunk[-1:])
-        chunk = chunk[:-padding]
-        return chunk
+        return chunk[:-int(chunk[-1:])]
 
     def encrypt(self, chunk, first_part=False):
         """ Encrypt chunk. """
