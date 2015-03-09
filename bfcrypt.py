@@ -28,7 +28,7 @@ class BlowfishCore:
             infile += os.urandom(1)
         # The padding boundary is specified by the latest byte.
         # See: scheme ISO 10126
-        infile += bytes(str(padding), 'utf-8')
+        infile += str(padding).encode()
         encrypted_file = self.__cipher.encrypt(infile)
 
         return encrypted_file
@@ -38,7 +38,7 @@ class BlowfishCore:
         """ Decrypt file and remove padding bytes. """
 
         original_file = self.__cipher.decrypt(infile)
-        padding = int(str(original_file)[-2])
+        padding = int(original_file.decode()[-1])
 
         return original_file[:-padding]
 
