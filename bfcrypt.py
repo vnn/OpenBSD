@@ -97,7 +97,7 @@ if __name__ == "__main__":
             bfcrypt = BlowfishCipher(get_key())
             outfile.write(bfcrypt.encrypt(chunk, first_part=True))
 
-        # Encrypt or decrypt the rest of the file chunk by chunk.
+        # Process the rest of the file chunk by chunk.
         while True:
             chunk = f.read(chunk_size)
             if chunk and args.encrypt:
