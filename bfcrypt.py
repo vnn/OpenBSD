@@ -1,7 +1,7 @@
 #!/usr/bin/env python3.4
 
 """
-Encrypt or decrypt a file using Blowfish cipher.
+Encrypt or decrypt a small file using Blowfish cipher.
 """
 
 import argparse
@@ -26,7 +26,8 @@ class BlowfishCore:
         padding = 8 - (len(infile) % 8)
         for i in range(padding - 1):
             infile += os.urandom(1)
-        # The latest byte is used as an indicator.
+        # The padding boundary is specified by the latest byte.
+        # See: scheme ISO 10126
         infile += bytes(str(padding), 'utf-8')
         encrypted_file = self.__cipher.encrypt(infile)
 
