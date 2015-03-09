@@ -15,27 +15,27 @@ class BlowfishCore:
     """ This class handles all the cryptograpgic operations. """
 
     def __init__(self, password):
-        self.cipher = Blowfish.new(password)
+        self.__cipher = Blowfish.new(password)
 
-    def encrypt(self, original_file):
+    def encrypt(self, infile):
 
         """ Encrypt a file using Blowfish. """
 
         # Calculate padding and add it to the file.
-        # The latest byte is equel to the total of padding bytes.
-        padding_length = 8 - (len(original_file) % 8)
-        for i in range(padding_length-1):
-            original_file += os.urandom(1)
-        original_file += bytes(str(padding_length), 'utf-8')
+        padding = 8 - (len(infile) % 8)
+        for i in range(padding-1):
+            infile += os.urandom(1)
+        # The latest byte is equal to the total of padding bytes.
+        infile += bytes(str(padding), 'utf-8')
 
-        encrypted_file = self.cipher.encrypt(original_file)
+        encrypted_file = self.__cipher.encrypt(infile)
         return encrypted_file
 
-    def decrypt(self, encrypted_file):
+    def decrypt(self, infile):
 
         """ Decrypt a file using Blowfish. """
 
-        original_file = self.cipher.decrypt(encrypted_file)
+        original_file = self.__cipher.decrypt(infile)
         padding = int(str(original_file)[-2])
         return original_file[:-padding]
 
