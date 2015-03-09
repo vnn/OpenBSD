@@ -5,8 +5,9 @@ Encrypt and decrypt a file using Blowfish cipher.
 """
 
 import argparse
-import os
 from getpass import getpass
+import os
+import sys
 
 from Crypto.Cipher import Blowfish
 
@@ -65,14 +66,15 @@ if __name__ == "__main__":
                        help='Encrypt file.')
     group.add_argument('-d', '--decrypt', const=True, action='store_const',
                        help='Decrypt file.')
-    parser.add_argument('infile', type=argparse.FileType('r'),
-                        metavar='<infile>', help='Read data from <infile>.')
-    parser.add_argument('outfile', type=argparse.FileType('w'), nargs='?',
-                        metavar='<outfile>', help='Write data to <outfile>.')
+    parser.add_argument('infile', type=argparse.FileType('r'), metavar='<infile>',
+                        help='Read data from <infile>.')
+    parser.add_argument('outfile', type=argparse.FileType('w'),
+                         default=sys.stdout, metavar='<outfile>', nargs='?',
+                         help='Write data to <outfile>.')
     args = parser.parse_args()
 
-    # Get password from user input, open infile
-    # and initialize Blowfish.
+    # Get password from user input, get data from stdin
+    # or file, and initialize Blowfish cipher.
     password = get_password()
     with open(args.infile.name, 'rb') as f:
         in_data = f.read()
@@ -85,8 +87,8 @@ if __name__ == "__main__":
         out_data = bfcrypt.decrypt(in_data)
 
     # Write processed data to file or stdin.
-    if args.outfile:
+    if args.outfile.name == '<stdout>':
+        sys.stdout.write(str(out_data)+'\n')
+    else:
         with open(args.outfile.name, 'wb') as f:
             f.write(out_data)
-    else:
-        print(out_data)
