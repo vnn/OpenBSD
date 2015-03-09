@@ -90,7 +90,6 @@ if __name__ == "__main__":
         if args.decrypt:
             iv = f.read(bs)
             bfcrypt = BlowfishCipher(get_key(), iv)
-
         # Init cipher for decryption using key from user input,
         # and prepend iv to the first encrypted chunk.
         elif args.encrypt:
