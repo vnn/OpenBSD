@@ -47,27 +47,26 @@ def get_password():
     """ This function handles password related operations. """
 
     if args.encrypt:
-        pprompt = lambda: (
-        getpass('Password: '), getpass('Retype password: '))
-        password, password_verif = pprompt()
+        prompt = lambda: (getpass('Password: '), getpass('Retype password: '))
+        password, password_verif = prompt()
         while password != password_verif:
             print('Passwords do not match. Try again')
-            password, password_verif = pprompt()
+            password, password_verif = prompt()
     elif args.decrypt:
         password = getpass()
     return password
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(prog='bfcrypt',
-        description='Encrypt or decrypt file using Blowfish')
+    parser = argparse.ArgumentParser(
+        prog='bfcrypt', description='Encrypt or decrypt file using Blowfish')
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-e', '--encrypt', const=True, action='store_const',
                        help='Encrypt file.')
     group.add_argument('-d', '--decrypt', const=True, action='store_const',
                        help='Decrypt file.')
     parser.add_argument('infile', type=argparse.FileType('r'),
-                       metavar='<infile>', help='Read data from <infile>.')
+                        metavar='<infile>', help='Read data from <infile>.')
     parser.add_argument('outfile', type=argparse.FileType('w'), nargs='?',
                         metavar='<outfile>', help='Write data to <outfile>.')
     args = parser.parse_args()
