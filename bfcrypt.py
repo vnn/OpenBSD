@@ -1,7 +1,7 @@
 #!/usr/bin/env python3.4
 
 """
-Encrypt and decrypt a file using Blowfish cipher.
+Encrypt or decrypt a file using Blowfish cipher.
 """
 
 import argparse
@@ -21,25 +21,24 @@ class BlowfishCore:
 
     def encrypt(self, infile):
 
-        """ Encrypt a file using Blowfish. """
+        """ Encrypt file and add necessary padding bytes. """
 
-        # Calculate padding and add it to the file.
         padding = 8 - (len(infile) % 8)
         for i in range(padding-1):
             infile += os.urandom(1)
-        # The latest byte is equal to the total of padding bytes.
+        # The latest byte is used as an indicator.
         infile += bytes(str(padding), 'utf-8')
-
         encrypted_file = self.__cipher.encrypt(infile)
+
         return encrypted_file
 
     def decrypt(self, infile):
 
-        """ Decrypt a file using Blowfish. """
+        """ Decrypt file and remove padding bytes. """
 
         original_file = self.__cipher.decrypt(infile)
-        # Remove the padding added during encryption.
         padding = int(str(original_file)[-2])
+
         return original_file[:-padding]
 
 
@@ -55,6 +54,7 @@ def get_password():
             password, password_verif = prompt()
     elif args.decrypt:
         password = getpass()
+
     return password
 
 
@@ -66,29 +66,24 @@ if __name__ == "__main__":
                        help='Encrypt file.')
     group.add_argument('-d', '--decrypt', const=True, action='store_const',
                        help='Decrypt file.')
-    parser.add_argument('infile', type=argparse.FileType('r'), metavar='<infile>',
-                        help='Read data from <infile>.')
-    parser.add_argument('outfile', type=argparse.FileType('w'),
-                         default=sys.stdout, metavar='<outfile>', nargs='?',
+    parser.add_argument('infile', type=argparse.FileType('r'),
+                        metavar='<infile>', help='Read data from <infile>.')
+    parser.add_argument('outfile', type=argparse.FileType('w'), nargs='?',
+                         metavar='<outfile>', default=sys.stdout,
                          help='Write data to <outfile>.')
     args = parser.parse_args()
 
-    # Get password from user input, get data from stdin
-    # or file, and initialize Blowfish cipher.
-    password = get_password()
+    # Init cipher with password read from user input, then read infile.
+    bfcrypt = BlowfishCore(get_password())
     with open(args.infile.name, 'rb') as f:
-        in_data = f.read()
-    bfcrypt = BlowfishCore(password)
+        infile = f.read()
 
-    # Process cryptographic operations.
-    if args.encrypt:
-        out_data = bfcrypt.encrypt(in_data)
-    elif args.decrypt:
-        out_data = bfcrypt.decrypt(in_data)
+    # Process cryptographic operations and store results.
+    data = bfcrypt.encrypt(infile) if args.encrypt else bfcrypt.decrypt(infile)
 
-    # Write processed data to file or stdin.
+    # Write processed data to stdout or outfile.
     if args.outfile.name == '<stdout>':
-        sys.stdout.write(str(out_data)+'\n')
+        sys.stdout.write(str(data)+'\n')
     else:
         with open(args.outfile.name, 'wb') as f:
-            f.write(out_data)
+            f.write(data)
