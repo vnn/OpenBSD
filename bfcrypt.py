@@ -63,7 +63,6 @@ def get_key():
             key, key_verif = prompt()
     elif args.decrypt:
         key = getpass()
-
     return key
 
 
