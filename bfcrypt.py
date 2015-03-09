@@ -12,7 +12,7 @@ import sys
 from Crypto.Cipher import Blowfish
 
 
-class BlowfishCore:
+class BlowfishCipher:
 
     """ This class handles all the cryptograpgic operations. """
 
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Init cipher with password read from user input, then read infile.
-    bfcrypt = BlowfishCore(get_password())
+    bfcrypt = BlowfishCipher(get_password())
     infile = args.infile.read()
 
     # Process cryptographic operations and store results.
