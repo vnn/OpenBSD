@@ -64,14 +64,14 @@ if __name__ == "__main__":
         prog='bfcrypt', description='Encrypt or decrypt file using Blowfish')
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-e', '--encrypt', const=True, action='store_const',
-                       help='Encrypt file')
+                       help='encrypt file')
     group.add_argument('-d', '--decrypt', const=True, action='store_const',
-                       help='Decrypt file')
+                       help='decrypt file')
     parser.add_argument('infile', type=argparse.FileType('rb'),
-                        metavar='<infile>', help='Read data from <infile>')
+                        metavar='<infile>', help='read data from <infile>')
     parser.add_argument('outfile', type=argparse.FileType('wb'), nargs='?',
                          metavar='<outfile>', default=sys.stdout,
-                         help='Write data to <outfile> (default: stdout)')
+                         help='write data to <outfile> (default: stdout)')
     args = parser.parse_args()
 
     # Init cipher with password read from user input, then read infile.
