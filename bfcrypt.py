@@ -81,5 +81,5 @@ if __name__ == "__main__":
     data = bfcrypt.encrypt(infile) if args.encrypt else bfcrypt.decrypt(infile)
 
     # Write processed data to stdout or outfile.
-    data = str(data)+'\n' if args.outfile.name == '<stdout>' else data
+    data = data.decode() if args.outfile.name == '<stdout>' else data
     args.outfile.write(data)
