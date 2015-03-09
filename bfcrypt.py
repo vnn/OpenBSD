@@ -20,9 +20,7 @@ class BlowfishCipher:
         self.__cipher = Blowfish.new(password)
 
     def encrypt(self, infile):
-
         """ Encrypt file and add necessary padding bytes. """
-
         # The padding boundary is specified by the latest byte.
         # See: scheme ISO 10126
         padding = 8 - (len(infile) % 8)
@@ -33,9 +31,7 @@ class BlowfishCipher:
         return encrypted_file
 
     def decrypt(self, infile):
-
         """ Decrypt file and remove padding bytes. """
-
         original_file = self.__cipher.decrypt(infile)
         padding = int(original_file.decode()[-1])
 
@@ -43,11 +39,10 @@ class BlowfishCipher:
 
 
 def get_password():
-
     """ This function handles password related operations. """
-
     if args.encrypt:
-        prompt = lambda: (getpass('Password: '), getpass('Retype password: '))
+        prompt = lambda: (getpass('Password: '),
+                          getpass('Retype password: '))
         password, password_verif = prompt()
         while password != password_verif:
             print('Passwords do not match. Try again')
