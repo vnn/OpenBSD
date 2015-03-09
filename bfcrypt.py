@@ -23,12 +23,11 @@ class BlowfishCipher:
 
         """ Encrypt file and add necessary padding bytes. """
 
-        padding = 8 - (len(infile) % 8)
-        for i in range(padding - 1):
-            infile += os.urandom(1)
         # The padding boundary is specified by the latest byte.
         # See: scheme ISO 10126
-        infile += str(padding).encode()
+        padding = 8 - (len(infile) % 8)
+        for idx, i in enumerate(range(padding), start=1):
+            infile += os.urandom(1) if idx != padding else str(padding).encode()
         encrypted_file = self.__cipher.encrypt(infile)
 
         return encrypted_file
