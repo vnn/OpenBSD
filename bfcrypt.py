@@ -14,7 +14,7 @@ from Crypto import Random
 
 class BlowfishCipher:
 
-    """ This class handles all the cryptograpgic operations. """
+    """ This class handles all the cryptographic operations. """
 
     def __init__(self, key, iv=None):
         self.__bs = bs
