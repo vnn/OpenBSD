@@ -22,16 +22,14 @@ class BlowfishCipher:
         self.__cipher = Blowfish.new(key, Blowfish.MODE_CBC, self.__iv)
 
     def __add_pad(self, chunk):
-        """ Return a chunk with padding added. """
-        # The padding boundary is specified by the latest byte.
-        # See: scheme ISO 10126
+        """ Return a chunk with padding added (ISO 10126). """
         padding = self.__bs - (len(chunk) % self.__bs)
         for idx, i in enumerate(range(padding), start=1):
             chunk += os.urandom(1) if idx != padding else str(padding).encode()
         return chunk
 
     def __del_pad(self, chunk):
-        """ Return a chunk with padding removed. """
+        """ Return a chunk with padding removed (ISO 10126). """
         return chunk[:-int(chunk[-1:])]
 
     def encrypt(self, chunk, first_part=False):
