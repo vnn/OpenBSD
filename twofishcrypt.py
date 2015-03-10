@@ -1,12 +1,14 @@
 #!/usr/bin/env python3.4
 
 """
-Encrypt or decrypt a file using Twofish cipher.
+Encrypt or decrypt a file using Twofish cipher
+designed by Bruce Schneier.
 """
+
+__version__ = '0.1'
 
 import argparse
 from getpass import getpass
-import struct
 import os
 
 from twofish import Twofish
@@ -17,14 +19,14 @@ class TwofishCipher:
     """ This class handles all the cryptographic operations. """
 
     def __init__(self, key):
-        self.__bs = 16
+        self.__bs = bs
         self.__cipher = Twofish(key)
 
     def __add_pad(self, chunk):
         """ Return a chunk with padding added (ISO 10126). """
         padding = self.__bs - len(chunk)
         for idx, i in enumerate(range(padding), start=1):
-            chunk += os.urandom(1) if idx != padding else struct.pack("B", padding)
+            chunk += os.urandom(1) if idx != padding else bytes([padding])
         return chunk
 
     def __del_pad(self, chunk):
