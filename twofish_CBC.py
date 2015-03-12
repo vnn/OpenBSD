@@ -26,26 +26,29 @@ class TwofishCipher:
 
     def encrypt(self, buf, extra_block=False):
         """ Return an encrypted block. """
-        if len(buf) == block_size and not extra_block:
-            # Generate an initialization vector, XOR it with the first
-            # clear block to start the chain and encrypt the result.
-            if not self.__prev:
-                iv = os.urandom(self.__block_size)
-                self.__prev = iv
-                self.__prev = self.__cipher.encrypt(self.__xor(buf, self.__prev))
-                return iv + self.__prev
-            # Encrypt a block.
-            else:
-                self.__prev = self.__cipher.encrypt(self.__xor(buf, self.__prev))
-                return self.__prev
-        else:
-            if len(buf) != self.__block_size:
-                self.__prev = self.__cipher.encrypt(self.__xor(self.__pad(buf), self.__prev))
-                return self.__prev
-            else:
-                random_block = os.urandom(self.__block_size - 1) + bytes([16])
-                self.__prev = self.__xor(self.__cipher.decrypt(buf), self.__prev)
-                return self.__prev + random_block
+        # Generate an initialization vector, XOR it with the first
+        # clear block to start the chain and encrypt the result.
+        # The iv is appened to the result and returned.
+        if not self.__prev:
+            iv = os.urandom(self.__block_size)
+            self.__prev = self.__cipher.encrypt(self.__xor(buf, iv))
+            return iv + self.__prev
+        # Xor a clear block with the previous encrypted block,
+        # then encrypt the result.
+        elif (len(buf) == block_size) and not extra_block:
+            self.__prev = self.__cipher.encrypt(self.__xor(buf, self.__prev))
+            return self.__prev
+        # Add padding to the last block, XOR it with the previous
+        # encrypted block and encrypt the result.
+        elif len(buf) != self.__block_size:
+            self.__prev = self.__cipher.encrypt(self.__xor(self.__pad(buf), self.__prev))
+            return self.__prev
+        # XOR the last block with the previous encrypted block,
+        # and generate an extra 16 bytes padding block.
+        elif extra_block:
+            random_block = os.urandom(self.__block_size - 1) + bytes([16])
+            self.__prev = self.__xor(self.__cipher.decrypt(buf), self.__prev)
+            return self.__prev + random_block
 
     def decrypt(self, buf, unpad=False):
         """ Return a decrypted block. """
@@ -72,7 +75,7 @@ class TwofishCipher:
         return buf
 
     def __unpad(self, buf):
-        """ Return a buf with padding removed (ISO 10126). """
+        """ Return a block with padding removed (ISO 10126). """
         return buf[:-buf[-1]] if buf[:-buf[-1]] else b''
 
     def __xor(self, x, y):
