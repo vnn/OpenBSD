@@ -19,47 +19,50 @@ class TwofishCipher:
     This class handles all the cryptographic operations.
     """
 
-    def __init__(self, key):
+    def __init__(self, key, file_size):
         self.__cipher = Twofish(key)
-        self.__block_size = block_size
         self.__prev = bytes()
+        self.__file_size = file_size
+        self.__block_count = 0
 
-    def encrypt(self, buf, extra_block=False):
+    def encrypt(self, buf):
         """ Return an encrypted block. """
+        self.__block_count += block_size
         # Generate an initialization vector, XOR it with the first
         # clear block to start the chain and encrypt the result.
-        # The iv is appened to the result and returned.
+        # The iv is prepened to the result and returned.
         if not self.__prev:
-            iv = os.urandom(self.__block_size)
+            iv = os.urandom(block_size)
             self.__prev = self.__cipher.encrypt(self.__xor(buf, iv))
             return iv + self.__prev
         # Xor a clear block with the previous encrypted block,
-        # then encrypt the result.
-        elif (len(buf) == block_size) and not extra_block:
+        # then encrypt the result and return it.
+        elif (len(buf) == block_size) and (self.__block_count != self.__file_size):
             self.__prev = self.__cipher.encrypt(self.__xor(buf, self.__prev))
             return self.__prev
         # Add padding to the last block, XOR it with the previous
-        # encrypted block and encrypt the result.
-        elif len(buf) != self.__block_size:
+        # encrypted block and return the encrypted result.
+        elif len(buf) != block_size:
             self.__prev = self.__cipher.encrypt(self.__xor(self.__pad(buf), self.__prev))
             return self.__prev
         # XOR the last block with the previous encrypted block,
-        # and generate an extra 16 bytes padding block.
-        elif extra_block:
-            random_block = os.urandom(self.__block_size - 1) + bytes([16])
+        # and generate an extra 16 bytes padding block. Return the result.
+        elif self.__block_count == self.__file_size:
+            random_block = os.urandom(block_size - 1) + bytes([16])
             self.__prev = self.__xor(self.__cipher.decrypt(buf), self.__prev)
             return self.__prev + random_block
 
-    def decrypt(self, buf, unpad=False):
+    def decrypt(self, buf):
         """ Return a decrypted block. """
+        self.__block_count += block_size
         # First block of the file: this is the initialization vector.
         # Store it into self.__prev for later use with the 1st encrypted block.
-        # Return an empty byte string to keep compatibility with write().
+        # Return an empty byte string to maintain compatibility with write().
         if not self.__prev:
             self.__prev = buf
             return b''
         # Decrypt a block.
-        elif not unpad:
+        elif self.__block_count != self.__file_size:
             xored = self.__xor(self.__cipher.decrypt(buf), self.__prev)
             self.__prev = buf
             return xored
@@ -69,7 +72,7 @@ class TwofishCipher:
 
     def __pad(self, buf):
         """ Return a block with padding added (ISO 10126). """
-        padding = self.__block_size - len(buf)
+        padding = block_size - len(buf)
         for idx, i in enumerate(range(padding), start=1):
             buf += os.urandom(1) if idx != padding else bytes([padding])
         return buf
@@ -115,13 +118,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     with open(args.infile.name, 'rb') as f:
-        filesize = os.path.getsize(args.infile.name)
+        file_size = os.path.getsize(args.infile.name)
         outfile = open(args.outfile.name, 'wb')
         block_size = 16
 
         # Initialize Twofish cipher with the key provided
         # by the user.
-        cipher = TwofishCipher(get_key())
+        cipher = TwofishCipher(get_key(), file_size)
 
         # Process the rest of the file chunk by chunk.
         # When decrypting, wait for the last block, then remove
@@ -130,15 +133,9 @@ if __name__ == "__main__":
             buf = f.read(block_size)
 
             if buf and args.encrypt:
-                if f.tell() == filesize and len(buf) == block_size:
-                    outfile.write(cipher.encrypt(buf, extra_block=True))
-                else:
-                    outfile.write(cipher.encrypt(buf))
+                outfile.write(cipher.encrypt(buf))
             elif buf and args.decrypt:
-                if f.tell() == filesize:
-                    outfile.write(cipher.decrypt(buf, unpad=True))
-                else:
-                    outfile.write(cipher.decrypt(buf))
+                outfile.write(cipher.decrypt(buf))
             else:
                 print('done')
                 break
