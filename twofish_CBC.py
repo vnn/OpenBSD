@@ -3,6 +3,47 @@
 """
 Encrypt or decrypt a file using Twofish cipher
 and cipher block chaining mode (CBC).
+
+https://www.schneier.com/twofish.html
+https://pypi.python.org/pypi/twofish/
+http://csrc.nist.gov/publications/fips/fips81/fips81.htm
+
+About:
+=======
+Twofish cipher is initialized with a user defined password.
+It operates exclusively on 16 bytes blocks. The main function
+reads a file chunk by chunk and writes the data processed
+via the TwofishCipher class to the outfile.
+
+CBC Encryption:
+===========
+First, we generate an initialization vector (16 bytes
+generated via OpenBSD urandom), XOR it with the first clear
+block to start the chain and encrypt the result. The iv
+is prepended to this first encrypted block and written to
+the outfile.
+
+For other blocks, XOR each clear block with the previous
+encrypted block, then encrypt the result and write it to
+the outfile.
+
+Same thing apply for the last block except we add some extra
+padding to obtain a 16 bytes block to work with the cipher.
+If this last block is already equal to 16 bytes, we'll
+add an extra block of 16 bytes full of padding to keep
+compatibility with decryption.
+
+CBC Decryption:
+===========
+First read the first block of the file: this is the iv we used
+during encryption process.
+
+We reverse the operations we did previously, so decrypt each block
+and XOR it with the previously encrypted block to get the clear
+result.
+
+Same thing apply for the latest block except we remove the extra
+padding.
 """
 
 __version__ = '0.1'
@@ -28,25 +69,20 @@ class TwofishCipher:
     def encrypt(self, buf):
         """ Return an encrypted block. """
         self.__block_count += block_size
-        # Generate an initialization vector, XOR it with the first
-        # clear block to start the chain and encrypt the result.
-        # The iv is prepened to the result and returned.
+        # First block, iv generated and prepened to the 1st encrypted block.
         if not self.__prev:
             iv = os.urandom(block_size)
             self.__prev = self.__cipher.encrypt(self.__xor(buf, iv))
             return iv + self.__prev
-        # Xor a clear block with the previous encrypted block,
-        # then encrypt the result and return it.
+        # Default blocks.
         elif (len(buf) == block_size) and (self.__block_count != self.__file_size):
             self.__prev = self.__cipher.encrypt(self.__xor(buf, self.__prev))
             return self.__prev
-        # Add padding to the last block, XOR it with the previous
-        # encrypted block and return the encrypted result.
+        # Last block, add some extra padding.
         elif len(buf) != block_size:
             self.__prev = self.__cipher.encrypt(self.__xor(self.__pad(buf), self.__prev))
             return self.__prev
-        # XOR the last block with the previous encrypted block,
-        # and generate an extra 16 bytes padding block. Return the result.
+        # Last block equal to 16 bytes, add an extra 16 bytes padding block.
         elif self.__block_count == self.__file_size:
             random_block = os.urandom(block_size - 1) + bytes([16])
             self.__prev = self.__xor(self.__cipher.decrypt(buf), self.__prev)
@@ -56,7 +92,6 @@ class TwofishCipher:
         """ Return a decrypted block. """
         self.__block_count += block_size
         # First block of the file: this is the initialization vector.
-        # Store it into self.__prev for later use with the 1st encrypted block.
         # Return an empty byte string to maintain compatibility with write().
         if not self.__prev:
             self.__prev = buf
@@ -122,8 +157,6 @@ if __name__ == "__main__":
         outfile = open(args.outfile.name, 'wb')
         block_size = 16
 
-        # Initialize Twofish cipher with the key provided
-        # by the user.
         cipher = TwofishCipher(get_key(), file_size)
 
         # Process the file chunk by chunk.
