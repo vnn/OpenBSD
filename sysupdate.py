@@ -77,9 +77,9 @@ if __name__ == "__main__":
         exit()
     valid_cvs_url = re.compile(
         '^[A-Z0-9._%-+]+@'
-        '(([A-Z0-9]([A-Z0-9-]{0,61}[A-Z0-9])?)+(\.[A-Z]{2,6}\.?)?|'
+        '(([A-Z0-9-\.]{0,61}[A-Z0-9])+(\.[A-Z]{2,6})?|'
         '\d{1,3}\.\d{1,3}\.\d{1,3})'
-        '(:/[^?#]*)?$', re.IGNORECASE)
+        ':/([^?#]*)?$', re.IGNORECASE)
     if not re.match(valid_cvs_url, cvs_root):
         print('Error: invalid CVS server')
         exit()
