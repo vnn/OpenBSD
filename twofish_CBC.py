@@ -126,9 +126,7 @@ if __name__ == "__main__":
         # by the user.
         cipher = TwofishCipher(get_key(), file_size)
 
-        # Process the rest of the file chunk by chunk.
-        # When decrypting, wait for the last block, then remove
-        # previously added padding.
+        # Process the file chunk by chunk.
         while True:
             buf = f.read(block_size)
 
